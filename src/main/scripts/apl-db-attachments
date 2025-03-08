@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ -z "${PATH_TO_FX}" ]; then
+  echo "environment variable PATH_TO_FX is unset. Please set it as an exported environment variable according to the location of your javafx-sdk: PATH_TO_FX=<path-to-javafx-sdk>/lib"
+  exit 1
+fi
+
+if [ -z "${JAVACMD}" ]; then
+  if [ -n "$JAVA_HOME"  ] ; then
+    JAVACMD="$JAVA_HOME/bin/java"
+  else
+    JAVACMD=`which java`
+  fi
+fi
+
+exec "${JAVACMD}" ${JAVA_OPTS} --module-path "${PATH_TO_FX}" --add-modules=javafx.controls,javafx.fxml -jar ./${project.name}-${project.version}.jar "$@"

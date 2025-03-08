@@ -1,5 +1,6 @@
 package com.apl.model;
 
+import com.apl.db.DBConnection;
 import com.bmc.arsys.arcompress.ARDecompressor;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
@@ -25,7 +26,7 @@ public class ATTRecord {
     private final String fieldName;
     private final ObservableValue<Integer> originalSize;
 
-    ATTRecord(String entryID, String fileName, int originalSize, int formID, int resolvedFormID, int fieldID, String formName, String fieldName) {
+    public ATTRecord(String entryID, String fileName, int originalSize, int formID, int resolvedFormID, int fieldID, String formName, String fieldName) {
         this.entryID = new SimpleStringProperty(entryID);
         this.originalSize = new ReadOnlyObjectWrapper<>(originalSize);
         this.formID = formID;
@@ -40,16 +41,9 @@ public class ATTRecord {
         this.fileName = new SimpleStringProperty(fileName);
     }
 
-    public byte[] getBytes(DBConnection dbConn) {
+    public byte[] getBytes(DBConnection dbConnection) throws SQLException {
         byte[] bytes = null;
-        int formID = this.formID;
-        if (formID != this.resolvedFormID) {
-            formID = this.resolvedFormID;
-        }
-
-        ResultSet byteResults = dbConn.getAttachmentBytes(formID, this.fieldID, this.entryID.getValue());
-
-        try {
+        try (ResultSet byteResults = dbConnection.getAttachmentBytes(resolvedFormID, fieldID, entryID.getValue())) {
             while (byteResults.next()) {
                 bytes = byteResults.getBytes(1);
                 if (bytes != null) {
@@ -67,12 +61,7 @@ public class ATTRecord {
                     bytes = new byte[0];
                 }
             }
-
-            byteResults.close();
-        } catch (SQLException e) {
-            logger.error(e);
         }
-
         return bytes;
     }
 

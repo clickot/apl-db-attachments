@@ -1,4 +1,4 @@
-package com.apl;
+package com.apl.view;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,9 +19,9 @@ public class ComboBoxAutoComplete<T> {
     public ComboBoxAutoComplete(ComboBox<T> cmb) {
         this.cmb = cmb;
         this.originalItems = FXCollections.observableArrayList(cmb.getItems());
-        cmb.setTooltip(new Tooltip());
-        cmb.setOnKeyPressed(this::handleOnKeyPressed);
-        cmb.setOnHidden(this::handleOnHiding);
+        this.cmb.setTooltip(new Tooltip());
+        this.cmb.setOnKeyPressed(this::handleOnKeyPressed);
+        this.cmb.setOnHidden(this::handleOnHiding);
     }
 
     public void handleOnKeyPressed(KeyEvent e) {

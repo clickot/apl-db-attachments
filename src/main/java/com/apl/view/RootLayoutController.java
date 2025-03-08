@@ -48,12 +48,12 @@ public class RootLayoutController {
 
     @FXML
     private void handleLoadConfiguration() {
-        this.mainApp.loadConfig();
+        mainApp.loadConfig();
     }
 
     @FXML
     private void handleSaveConfiguration() {
-        this.mainApp.saveConfig();
+        mainApp.saveConfig();
     }
 
     @FXML
@@ -71,7 +71,7 @@ public class RootLayoutController {
             controller.setDialogStage(dialogStage);
             dialogStage.showAndWait();
             if (controller.getOkClicked()) {
-                this.mainApp.updateConnectionDetails(controller.getUserName(), controller.getPassword(), controller.getConnectionString());
+                mainApp.updateConnectionDetails(controller.getUserName(), controller.getPassword(), controller.getConnectionString());
             }
         } catch (IOException e) {
             logger.error("IOException opening Connection Build dialog: {}", e.getMessage());
@@ -86,9 +86,9 @@ public class RootLayoutController {
     @FXML
     private void handleAbout() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("APL DB Attachments");
+        alert.setTitle(MainApp.getAppName());
         alert.setHeaderText("About");
-        String aboutBox = "APL DB Attachments v2.1";
+        String aboutBox = MainApp.getAppName() + " " + MainApp.getVersion();
         aboutBox = aboutBox + "\nA Programming Legacy";
         aboutBox = aboutBox + "\nhttp://remedylegacy.com";
         alert.setContentText(aboutBox);
