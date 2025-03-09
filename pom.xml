@@ -5,7 +5,7 @@
 
     <groupId>com.apl</groupId>
     <artifactId>apl-db-attachments</artifactId>
-    <version>2.1.0</version>
+    <version>0.1.0</version>
 
     <properties>
         <!-- java properties -->
