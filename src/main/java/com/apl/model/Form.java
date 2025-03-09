@@ -4,15 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Form {
-    private final List<Field> fieldList = new ArrayList<>();
     private final int id;
     private final int resolvedID;
     private final String name;
+    private final List<Field> fieldList;
 
     public Form(String name, int id, int resolvedID) {
         this.name = name;
         this.id = id;
         this.resolvedID = resolvedID;
+        this.fieldList = new ArrayList<>();
     }
 
     public void addField(String fieldName, Integer id) {
@@ -38,19 +39,19 @@ public class Form {
         return null;
     }
 
-    public List<Field> getFieldList() {
-        return this.fieldList;
-    }
-
-    public int getID() {
-        return this.id;
-    }
-
-    public String getName() {
-        return this.name;
+    public int getId() {
+        return id;
     }
 
     public int getResolvedID() {
-        return this.resolvedID;
+        return resolvedID;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<Field> getFieldList() {
+        return fieldList;
     }
 }
