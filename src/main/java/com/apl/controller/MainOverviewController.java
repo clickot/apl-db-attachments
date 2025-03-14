@@ -1,4 +1,4 @@
-package com.apl.view;
+package com.apl.controller;
 
 import com.apl.MainApp;
 import com.apl.db.DBConnection;
