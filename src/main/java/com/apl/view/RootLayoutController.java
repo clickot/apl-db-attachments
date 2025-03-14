@@ -21,19 +21,14 @@ public class RootLayoutController {
 
     @FXML
     private final MenuBar menuBar = new MenuBar();
-
     @FXML
     private Menu fileMenu = new Menu();
-
     @FXML
     private Menu helpMenu = new Menu();
-
     @FXML
     private MenuItem buildConnectionString = new MenuItem();
-
     @FXML
     private MenuItem close = new MenuItem();
-
     @FXML
     private MenuItem about = new MenuItem();
 
@@ -48,12 +43,12 @@ public class RootLayoutController {
 
     @FXML
     private void handleLoadConfiguration() {
-        this.mainApp.loadConfig();
+        mainApp.loadConfig();
     }
 
     @FXML
     private void handleSaveConfiguration() {
-        this.mainApp.saveConfig();
+        mainApp.saveConfig();
     }
 
     @FXML
@@ -62,16 +57,19 @@ public class RootLayoutController {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("view/ConnectionConfiguration.fxml"));
             AnchorPane page = loader.load();
+            Scene scene = new Scene(page);
+
             Stage dialogStage = new Stage();
             dialogStage.setTitle("Connection Configuration");
             dialogStage.initModality(Modality.WINDOW_MODAL);
-            Scene scene = new Scene(page);
             dialogStage.setScene(scene);
+
             ConnectionConfigurationController controller = loader.getController();
             controller.setDialogStage(dialogStage);
             dialogStage.showAndWait();
+
             if (controller.getOkClicked()) {
-                this.mainApp.updateConnectionDetails(controller.getUserName(), controller.getPassword(), controller.getConnectionString());
+                mainApp.updateConnectionDetails(controller.getUserName(), controller.getPassword(), controller.getConnectionString());
             }
         } catch (IOException e) {
             logger.error("IOException opening Connection Build dialog: {}", e.getMessage());
@@ -86,11 +84,11 @@ public class RootLayoutController {
     @FXML
     private void handleAbout() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("APL DB Attachments");
+        alert.setTitle(MainApp.getAppName());
         alert.setHeaderText("About");
-        String aboutBox = "APL DB Attachments v2.1";
-        aboutBox = aboutBox + "\nA Programming Legacy";
-        aboutBox = aboutBox + "\nhttp://remedylegacy.com";
+        String aboutBox = MainApp.getAppName() + " " + MainApp.getVersion();
+        aboutBox += "\nbased on: A Programming Legacy";
+        aboutBox += "\nhttp://remedylegacy.com";
         alert.setContentText(aboutBox);
         alert.showAndWait();
     }

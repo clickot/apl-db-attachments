@@ -1,6 +1,6 @@
 package com.apl.view;
 
-import com.apl.model.DBConnection;
+import com.apl.db.DBConnection;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
@@ -43,188 +43,185 @@ public class ConnectionConfigurationController {
 
     private void buildConnectionString() {
         String s = "";
-        if (!this.dbTypeComboBox.getSelectionModel().isEmpty()) {
-            if (this.dbTypeComboBox.getSelectionModel().getSelectedItem().equals("SQL Server")) {
+        if (!dbTypeComboBox.getSelectionModel().isEmpty()) {
+            if (dbTypeComboBox.getSelectionModel().getSelectedItem().equals("SQL Server")) {
                 s = "jdbc:sqlserver://";
-                if (!this.serverName.getText().trim().isEmpty()) {
-                    s = s + this.serverName.getText();
+                if (!serverName.getText().trim().isEmpty()) {
+                    s += serverName.getText();
                 }
 
-                if (!this.serverPort.getText().trim().isEmpty()) {
-                    s = s + ":" + this.serverPort.getText();
+                if (!serverPort.getText().trim().isEmpty()) {
+                    s += ":" + serverPort.getText();
                 }
 
-                if (!this.databaseName.getText().trim().isEmpty()) {
-                    s = s + ";databaseName=" + this.databaseName.getText();
+                if (!databaseName.getText().trim().isEmpty()) {
+                    s += ";databaseName=" + databaseName.getText();
                 }
 
-                if (!this.serverDetails.getText().trim().isEmpty()) {
-                    s = s + ";instance=" + this.serverDetails.getText();
+                if (!serverDetails.getText().trim().isEmpty()) {
+                    s += ";instance=" + serverDetails.getText();
                 }
-            } else if (this.dbTypeComboBox.getSelectionModel().getSelectedItem().equals("Oracle")) {
+            } else if (dbTypeComboBox.getSelectionModel().getSelectedItem().equals("Oracle")) {
                 s = "jdbc:oracle:thin:";
-                if (!this.serverName.getText().trim().isEmpty()) {
-                    if (this.oracleSID.isSelected()) {
-                        s = s + "@" + this.serverName.getText();
-                    } else if (this.oracleService.isSelected()) {
-                        s = s + "@//" + this.serverName.getText();
+                if (!serverName.getText().trim().isEmpty()) {
+                    if (oracleSID.isSelected()) {
+                        s += "@" + serverName.getText();
+                    } else if (oracleService.isSelected()) {
+                        s += "@//" + serverName.getText();
                     }
                 }
 
-                if (!this.serverPort.getText().trim().isEmpty()) {
-                    s = s + ":" + this.serverPort.getText();
+                if (!serverPort.getText().trim().isEmpty()) {
+                    s += ":" + serverPort.getText();
                 }
 
-                if (!this.serverDetails.getText().trim().isEmpty()) {
-                    if (this.oracleSID.isSelected()) {
-                        s = s + ":" + this.serverDetails.getText();
-                    } else if (this.oracleService.isSelected()) {
-                        s = s + "/" + this.serverDetails.getText();
+                if (!serverDetails.getText().trim().isEmpty()) {
+                    if (oracleSID.isSelected()) {
+                        s += ":" + serverDetails.getText();
+                    } else if (oracleService.isSelected()) {
+                        s += "/" + serverDetails.getText();
                     }
                 }
-            } else if (this.dbTypeComboBox.getSelectionModel().getSelectedItem().equals("PostgreSQL")) {
+            } else if (dbTypeComboBox.getSelectionModel().getSelectedItem().equals("PostgreSQL")) {
                 s = "jdbc:postgresql://";
-                if (!this.serverName.getText().trim().isEmpty()) {
-                    s = s + this.serverName.getText();
+                if (!serverName.getText().trim().isEmpty()) {
+                    s += serverName.getText();
                 }
 
-                if (!this.serverPort.getText().trim().isEmpty()) {
-                    s = s + ":" + this.serverPort.getText();
+                if (!serverPort.getText().trim().isEmpty()) {
+                    s += ":" + serverPort.getText();
                 }
 
-                if (!this.databaseName.getText().trim().isEmpty()) {
-                    s = s + "/" + this.databaseName.getText();
+                if (!databaseName.getText().trim().isEmpty()) {
+                    s += "/" + databaseName.getText();
                 }
             }
         }
 
-        this.connectionString.setText(s);
+        connectionString.setText(s);
     }
 
     public TextField getConnectionString() {
-        return this.connectionString;
+        return connectionString;
     }
 
     public boolean getOkClicked() {
-        return this.okClicked;
+        return okClicked;
     }
 
     public TextField getPassword() {
-        return this.password;
+        return password;
     }
 
     public TextField getUserName() {
-        return this.userName;
+        return userName;
     }
 
     @FXML
     private void handleCancel() {
-        this.dialogStage.close();
+        dialogStage.close();
     }
 
     @FXML
     private void handleDataChange() {
-        this.buildConnectionString();
+        buildConnectionString();
     }
 
     @FXML
     private void handleDBType() {
-        this.serverDetailsLabel.setVisible(true);
-        if ((this.dbTypeComboBox.getSelectionModel().getSelectedItem()).equals("SQL Server")) {
-            this.databaseNameLabel.setVisible(true);
-            this.databaseName.setVisible(true);
-            this.serverDetailsLabel.setText("Server Instance");
-            this.serverDetailsLabel.setVisible(true);
-            this.serverDetails.setVisible(true);
-            this.oracleSID.setVisible(false);
-            this.oracleService.setVisible(false);
-            if (this.serverPort.getText().isEmpty() || this.serverPort.getText().equals("1521") || this.serverPort.getText().equals("5432")) {
-                this.serverPort.setText("1433");
-            }
-        } else if ((this.dbTypeComboBox.getSelectionModel().getSelectedItem()).equals("Oracle")) {
-            this.databaseNameLabel.setVisible(false);
-            this.databaseName.setVisible(false);
-            this.handleOracleTypeSelect();
-            this.oracleSID.setVisible(true);
-            this.oracleService.setVisible(true);
-            this.serverDetails.setVisible(true);
-            this.serverDetailsLabel.setVisible(true);
-            if (this.serverPort.getText().isEmpty() || this.serverPort.getText().equals("1433") || this.serverPort.getText().equals("5432")) {
-                this.serverPort.setText("1521");
-            }
-        } else if ((this.dbTypeComboBox.getSelectionModel().getSelectedItem()).equals("PostgreSQL")) {
-            this.databaseNameLabel.setVisible(true);
-            this.databaseName.setVisible(true);
-            this.serverDetails.setVisible(false);
-            this.serverDetailsLabel.setVisible(false);
-            this.oracleSID.setVisible(false);
-            this.oracleService.setVisible(false);
-            if (this.serverPort.getText().isEmpty() || this.serverPort.getText().equals("1433") || this.serverPort.getText().equals("1521")) {
-                this.serverPort.setText("5432");
-            }
+        serverDetailsLabel.setVisible(true);
+        if ((dbTypeComboBox.getSelectionModel().getSelectedItem()).equals("SQL Server")) {
+            sqlserverSelected();
+        } else if ((dbTypeComboBox.getSelectionModel().getSelectedItem()).equals("Oracle")) {
+            oracleSelected();
+        } else if ((dbTypeComboBox.getSelectionModel().getSelectedItem()).equals("PostgreSQL")) {
+            postgresSelected();
         }
+        buildConnectionString();
+    }
 
-        this.buildConnectionString();
+    private void oracleSelected() {
+        databaseNameLabel.setVisible(false);
+        databaseName.setVisible(false);
+        handleOracleTypeSelect();
+        oracleSID.setVisible(true);
+        oracleService.setVisible(true);
+        serverDetails.setVisible(true);
+        serverDetailsLabel.setVisible(true);
+        if (serverPort.getText().isEmpty() || serverPort.getText().equals("1433") || serverPort.getText().equals("5432")) {
+            serverPort.setText("1521");
+        }
+    }
+
+    private void postgresSelected() {
+        databaseNameLabel.setVisible(true);
+        databaseName.setVisible(true);
+        serverDetails.setVisible(false);
+        serverDetailsLabel.setVisible(false);
+        oracleSID.setVisible(false);
+        oracleService.setVisible(false);
+        if (serverPort.getText().isEmpty() || serverPort.getText().equals("1433") || serverPort.getText().equals("1521")) {
+            serverPort.setText("5432");
+        }
+    }
+
+    private void sqlserverSelected() {
+        databaseNameLabel.setVisible(true);
+        databaseName.setVisible(true);
+        serverDetailsLabel.setText("Server Instance");
+        serverDetailsLabel.setVisible(true);
+        serverDetails.setVisible(true);
+        oracleSID.setVisible(false);
+        oracleService.setVisible(false);
+        if (serverPort.getText().isEmpty() || serverPort.getText().equals("1521") || serverPort.getText().equals("5432")) {
+            serverPort.setText("1433");
+        }
     }
 
     @FXML
     private void handleOk() {
-        this.okClicked = true;
-        this.dialogStage.close();
+        okClicked = true;
+        dialogStage.close();
     }
 
     @FXML
     private void handleOracleTypeSelect() {
-        if (this.oracleSID.isSelected()) {
-            this.serverDetailsLabel.setText("SID");
+        if (oracleSID.isSelected()) {
+            serverDetailsLabel.setText("SID");
         }
 
-        if (this.oracleService.isSelected()) {
-            this.serverDetailsLabel.setText("Service");
+        if (oracleService.isSelected()) {
+            serverDetailsLabel.setText("Service");
         }
 
-        this.buildConnectionString();
+        buildConnectionString();
     }
 
     @FXML
     private void handleTestConnection() {
         try {
-            DBConnection dbConn = new DBConnection();
-            dbConn.getConnection(this.connectionString.getText(), this.userName.getText(), this.password.getText());
-            this.openAlert(AlertType.INFORMATION, "Success", null, "Connection Succeeded");
+            DBConnection.getInstance(connectionString.getText(), userName.getText(), password.getText()).getConnection();
+            openAlert(AlertType.INFORMATION, "Success", "Connection Succeeded");
         } catch (SQLException e) {
-            this.openAlert(AlertType.ERROR, "Error", null, "Connection Failed: " + e.getMessage());
+            openAlert(AlertType.ERROR, "Error", "Connection Failed: " + e.getMessage());
         }
 
     }
 
     @FXML
     private void initialize() {
-        this.dbTypeComboBox.getItems().add("SQL Server");
-        this.dbTypeComboBox.getItems().add("Oracle");
-        this.dbTypeComboBox.getItems().add("PostgreSQL");
-        this.databaseNameLabel.setVisible(false);
-        this.databaseName.setVisible(false);
-        this.serverDetailsLabel.setVisible(false);
-        this.serverDetails.setVisible(false);
-        this.oracleSID.setVisible(false);
-        this.oracleService.setVisible(false);
+        dbTypeComboBox.getItems().add("Oracle");
+        dbTypeComboBox.getItems().add("SQL Server");
+        dbTypeComboBox.getItems().add("PostgreSQL");
+        // preselect oracle server per default
+        dbTypeComboBox.getSelectionModel().selectFirst();
+        oracleSelected();
     }
 
-    private void openAlert(Alert.AlertType alertType, String title, String header, String content) {
+    private void openAlert(Alert.AlertType alertType, String title, String content) {
         Alert alert = new Alert(alertType);
-        if (title != null) {
-            alert.setTitle(title);
-        }
-
-        if (header != null) {
-            alert.setHeaderText(header);
-        }
-
-        if (content != null) {
-            alert.setContentText(content);
-        }
-
+        alert.setTitle(title);
+        alert.setContentText(content);
         alert.showAndWait();
     }
 
@@ -232,9 +229,8 @@ public class ConnectionConfigurationController {
         this.dialogStage = dialogStage;
         this.dialogStage.addEventHandler(KeyEvent.KEY_RELEASED, (event) -> {
             if (KeyCode.ESCAPE == event.getCode()) {
-                this.handleCancel();
+                handleCancel();
             }
-
         });
     }
 }

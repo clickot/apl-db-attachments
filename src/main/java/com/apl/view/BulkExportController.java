@@ -33,69 +33,69 @@ public class BulkExportController {
 
     @FXML
     private void handleFormSelection() {
-        if (this.formFolderRadio.isSelected()) {
-            this.formFolder = true;
+        if (formFolderRadio.isSelected()) {
+            formFolder = true;
         } else {
-            this.formFolder = false;
-            this.entryIDFolder = false;
-            this.fieldNameFolder = false;
-            this.entryIDFileRadio.setSelected(true);
-            this.fieldNameFileRadio.setSelected(true);
+            formFolder = false;
+            entryIDFolder = false;
+            fieldNameFolder = false;
+            entryIDFileRadio.setSelected(true);
+            fieldNameFileRadio.setSelected(true);
         }
 
     }
 
     @FXML
     private void handleEntryIDSelection() {
-        if (this.entryIDFolderRadio.isSelected()) {
-            this.formFolder = true;
-            this.entryIDFolder = true;
-            this.formFolderRadio.setSelected(true);
+        if (entryIDFolderRadio.isSelected()) {
+            formFolder = true;
+            entryIDFolder = true;
+            formFolderRadio.setSelected(true);
         } else {
-            this.entryIDFolder = false;
-            this.fieldNameFolder = false;
-            this.fieldNameFileRadio.setSelected(true);
+            entryIDFolder = false;
+            fieldNameFolder = false;
+            fieldNameFileRadio.setSelected(true);
         }
     }
 
     @FXML
     private void handleFieldNameSelection() {
-        if (this.fieldNameFolderRadio.isSelected()) {
-            this.formFolder = true;
-            this.entryIDFolder = true;
-            this.fieldNameFolder = true;
-            this.formFolderRadio.setSelected(true);
-            this.entryIDFolderRadio.setSelected(true);
+        if (fieldNameFolderRadio.isSelected()) {
+            formFolder = true;
+            entryIDFolder = true;
+            fieldNameFolder = true;
+            formFolderRadio.setSelected(true);
+            entryIDFolderRadio.setSelected(true);
         } else {
-            this.fieldNameFolder = false;
+            fieldNameFolder = false;
         }
 
     }
 
     @FXML
     private void handleOk() {
-        this.okClicked = true;
-        this.dialogStage.close();
+        okClicked = true;
+        dialogStage.close();
     }
 
     @FXML
     private void handleCancel() {
-        this.dialogStage.close();
+        dialogStage.close();
     }
 
     public boolean getOkClicked() {
-        return this.okClicked;
+        return okClicked;
     }
 
     public boolean isFormFolder() {
-        return this.formFolder;
+        return formFolder;
     }
 
     public boolean isEntryIDFolder() {
-        return this.entryIDFolder;
+        return entryIDFolder;
     }
 
     public boolean isFieldNameFolder() {
-        return this.fieldNameFolder;
+        return fieldNameFolder;
     }
 }

@@ -1,9 +1,9 @@
 package com.apl.view;
 
-import com.apl.ComboBoxAutoComplete;
 import com.apl.MainApp;
+import com.apl.db.DBConnection;
+import com.apl.db.Exporter;
 import com.apl.model.ATTRecord;
-import com.apl.model.DBConnection;
 import com.apl.model.Field;
 import com.apl.model.Form;
 import javafx.collections.ObservableList;
@@ -25,6 +25,8 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import static com.apl.db.Queries.getAttachmentRecordQuery;
+
 public class MainOverviewController {
     private static final Logger logger = LogManager.getLogger(MainOverviewController.class);
 
@@ -36,7 +38,6 @@ public class MainOverviewController {
     private TableView<ATTRecord> entryTable = new TableView<>();
     @FXML
     private ComboBox<String> fieldComboBox = new ComboBox<>();
-    private boolean fieldNameFolder = false;
     @FXML
     private TableColumn<ATTRecord, String> fileNameColumn = new TableColumn<>();
     @FXML
@@ -54,32 +55,23 @@ public class MainOverviewController {
     @FXML
     private TextField userName = new TextField();
 
-    private DBConnection dbConn = new DBConnection();
-    private boolean formFolder = true;
     private Map<String, Form> formMap;
-    private MainApp mainApp;
+    private boolean fieldNameFolder = false;
+    private boolean formFolder = true;
     private boolean entryIDFolder = false;
+    private MainApp mainApp;
+    private DBConnection dbConnection;
 
     public String getConnectionString() {
-        return this.connectionString.getText();
+        return connectionString.getText();
     }
 
     public void setConnectionString(TextField connectionString) {
         this.connectionString.setText(connectionString.getText());
     }
 
-    @SuppressWarnings("unused")
-    public DBConnection getDbConn() {
-        return this.dbConn;
-    }
-
-    @SuppressWarnings("unused")
-    public void setDbConn(DBConnection dbConn) {
-        this.dbConn = dbConn;
-    }
-
     public String getPassword() {
-        return this.password.getText();
+        return password.getText();
     }
 
     public void setPassword(TextField password) {
@@ -87,11 +79,22 @@ public class MainOverviewController {
     }
 
     public String getUserName() {
-        return this.userName.getText();
+        return userName.getText();
     }
 
     public void setUserName(TextField userName) {
         this.userName.setText(userName.getText());
+    }
+
+    public DBConnection getDBConnection() {
+        if (dbConnection == null) {
+            dbConnection = DBConnection.getInstance(getConnectionString(), getUserName(), getPassword());
+        }
+        return dbConnection;
+    }
+
+    public void setMainApp(MainApp mainApp) {
+        this.mainApp = mainApp;
     }
 
     @FXML
@@ -107,73 +110,77 @@ public class MainOverviewController {
     @FXML
     private void handleConnect() {
         try {
-            this.statusBar.setText("Starting Connection Process");
-            this.dbConn.getConnection(this.connectionString.getText(), this.userName.getText(), this.password.getText());
-            this.openWindow(AlertType.INFORMATION, "Success", "Connection Succeeded");
-            this.statusBar.setText("Loading Forms List");
-            this.formMap = this.dbConn.getFormData(null);
-            this.statusBar.setText("Forms List Loaded");
-            this.formComboBox.getItems().clear();
-            this.fieldComboBox.getItems().clear();
-            this.recordsQuery.clear();
-            this.entryTable.getItems().clear();
-            this.formComboBox.setTooltip(new Tooltip());
-            if (this.formMap != null) {
-                for (String formName : this.formMap.keySet()) {
-                    this.formComboBox.getItems().add(formName);
+            statusBar.setText("Starting Connection Process");
+            getDBConnection().getConnection();
+            openAlert(AlertType.INFORMATION, "Success", "Connection Succeeded");
+            statusBar.setText("Loading Forms List");
+            formMap = dbConnection.getFormData(null);
+            statusBar.setText("Forms List Loaded");
+            formComboBox.getItems().clear();
+            fieldComboBox.getItems().clear();
+            recordsQuery.clear();
+            entryTable.getItems().clear();
+            formComboBox.setTooltip(new Tooltip());
+            if (formMap != null) {
+                for (String formName : formMap.keySet()) {
+                    formComboBox.getItems().add(formName);
                 }
-
-                new ComboBoxAutoComplete<>(this.formComboBox);
-                this.statusBar.setText("Ready To Start");
+                new ComboBoxAutoComplete<>(formComboBox);
+                statusBar.setText("Ready To Start");
             } else {
-                this.statusBar.setText("Error loading FormMap");
+                statusBar.setText("Error loading FormMap");
             }
         } catch (SQLException e) {
-            this.openWindow(AlertType.ERROR, "Error", "Connection Failed: " + e.getMessage());
+            logger.error("error in db operation: {}", e.getMessage());
+            openAlert(AlertType.ERROR, "Error", "DB Operation Failed: " + e.getMessage());
         }
-
     }
 
     @FXML
     private void handleExecute() {
-        this.entryTable.getItems().clear();
-        Form form = this.formMap.get(this.formComboBox.getValue());
-        ObservableList<ATTRecord> recordList = this.dbConn.getAttachmentRecords(this.recordsQuery.getText(), form.getID(), form.getResolvedID(), form.getField(this.fieldComboBox.getValue()).getId(), this.formComboBox.getValue(), this.fieldComboBox.getValue());
-        if (recordList != null) {
-            this.entryTable.setItems(recordList);
-            if (recordList.size() == 1) {
-                this.recordCountLabel.setText(recordList.size() + " record");
-            } else if (recordList.size() > 1) {
-                this.recordCountLabel.setText(recordList.size() + " records");
-            } else {
-                this.recordCountLabel.setText("0 records");
-            }
+        entryTable.getItems().clear();
+        Form form = formMap.get(formComboBox.getValue());
+
+        ObservableList<ATTRecord> recordList = null;
+        try {
+            recordList = getDBConnection().getAttachmentRecords(recordsQuery.getText(), form.getResolvedID(), form.getField(fieldComboBox.getValue()).getId(), formComboBox.getValue(), fieldComboBox.getValue());
+        } catch (SQLException e) {
+            logger.error("error getting attachment records", e);
         }
 
+        if (recordList != null) {
+            entryTable.setItems(recordList);
+            if (recordList.size() == 1) {
+                recordCountLabel.setText(recordList.size() + " record");
+            } else if (recordList.size() > 1) {
+                recordCountLabel.setText(recordList.size() + " records");
+            } else {
+                recordCountLabel.setText("0 records");
+            }
+        }
     }
 
     @FXML
     private void handleFieldSelection() {
-        this.recordsQuery.setText(this.dbConn.getAttachmentRecordQuery(this.formMap, this.formComboBox.getValue(), this.fieldComboBox.getValue(), null));
+        recordsQuery.setText(getAttachmentRecordQuery(formMap, formComboBox.getValue(), fieldComboBox.getValue(), null));
     }
 
     @FXML
     private void handleFormSelection() {
-        Form form = this.formMap.get(this.formComboBox.getValue());
+        Form form = formMap.get(formComboBox.getValue());
         List<Field> fieldList = null;
         if (form != null) {
             fieldList = form.getFieldList();
         }
 
-        this.fieldComboBox.getItems().clear();
-        this.recordsQuery.clear();
-        this.entryTable.getItems().clear();
+        fieldComboBox.getItems().clear();
+        recordsQuery.clear();
+        entryTable.getItems().clear();
         if (fieldList != null) {
             for (Field field : fieldList) {
-                this.fieldComboBox.getItems().add(field.getName());
+                fieldComboBox.getItems().add(field.getName());
             }
         }
-
     }
 
     @FXML
@@ -191,52 +198,50 @@ public class MainOverviewController {
             controller.setDialogStage(dialogStage);
             dialogStage.showAndWait();
             if (controller.getOkClicked()) {
-                this.formFolder = controller.isFormFolder();
-                this.entryIDFolder = controller.isEntryIDFolder();
-                this.fieldNameFolder = controller.isFieldNameFolder();
-                this.saveFiles(true);
+                formFolder = controller.isFormFolder();
+                entryIDFolder = controller.isEntryIDFolder();
+                fieldNameFolder = controller.isFieldNameFolder();
+                saveFiles(true);
             }
 
-        } catch (IOException e) {
+        } catch (IOException | SQLException e) {
             logger.error("IOException opening Bulk Export dialog: {}", e.getMessage());
         }
     }
 
     @FXML
     private void handleSavePrompt() {
-        this.saveFiles(false);
+        try {
+            saveFiles(false);
+        } catch (SQLException | IOException e) {
+            logger.error("error saving files", e);
+        }
     }
 
     @FXML
     private void handleSelectAll() {
-        this.entryTable.getSelectionModel().selectAll();
+        entryTable.getSelectionModel().selectAll();
     }
 
     @FXML
     private void initialize() {
-        this.entryIDColumn.setCellValueFactory((cellData) -> cellData.getValue().getEntryID());
-        this.fileNameColumn.setCellValueFactory((cellData) -> cellData.getValue().getFileName());
-        this.fileSizeColumn.setCellValueFactory((cellData) -> cellData.getValue().getOriginalSize());
-        this.entryTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        entryIDColumn.setCellValueFactory((cellData) -> cellData.getValue().getEntryID());
+        fileNameColumn.setCellValueFactory((cellData) -> cellData.getValue().getFileName());
+        fileSizeColumn.setCellValueFactory((cellData) -> cellData.getValue().getOriginalSize());
+        entryTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
 
-    private void openWindow(Alert.AlertType alertType, String title, String content) {
+    private void openAlert(Alert.AlertType alertType, String title, String content) {
         Alert alert = new Alert(alertType);
-        alert.initOwner(this.mainApp.getPrimaryStage());
-        if (title != null) {
-            alert.setTitle(title);
-        }
-
-        if (content != null) {
-            alert.setContentText(content);
-        }
-
+        alert.initOwner(mainApp.getPrimaryStage());
+        alert.setTitle(title);
+        alert.setContentText(content);
         alert.showAndWait();
     }
 
-    private void saveFiles(boolean bulk) {
-        this.statusBar.setText("Export Process Starting");
-        ObservableList<ATTRecord> selectedItems = this.entryTable.getSelectionModel().getSelectedItems();
+    private void saveFiles(boolean bulk) throws SQLException, IOException {
+        statusBar.setText("Export Process Starting");
+        ObservableList<ATTRecord> selectedItems = entryTable.getSelectionModel().getSelectedItems();
         File selectedDirectory = null;
         if (bulk) {
             DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -246,15 +251,11 @@ public class MainOverviewController {
             }
         }
 
-        String output = MainApp.processExport(selectedItems, this.dbConn, bulk, selectedDirectory, this.formFolder, this.entryIDFolder, this.fieldNameFolder);
+        String output = new Exporter(getConnectionString(), getUserName(), getPassword()).export(selectedItems, bulk, selectedDirectory, formFolder, entryIDFolder, fieldNameFolder);
         if (!output.isEmpty()) {
-            this.openWindow(AlertType.ERROR, "Error", output);
+            openAlert(AlertType.ERROR, "Error", output);
         }
 
-        this.statusBar.setText("Export Complete");
-    }
-
-    public void setMainApp(MainApp mainApp) {
-        this.mainApp = mainApp;
+        statusBar.setText("Export completed");
     }
 }

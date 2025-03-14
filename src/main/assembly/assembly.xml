@@ -12,27 +12,28 @@
             <outputDirectory>/</outputDirectory>
         </file>
         <file>
-            <source>log4j.properties</source>
+            <source>${project.build.scriptSourceDirectory}/log4j.properties</source>
             <outputDirectory>/</outputDirectory>
         </file>
         <file>
-            <source>apl-db-attachments.properties</source>
+            <source>${project.build.scriptSourceDirectory}/apl-db-attachments.properties</source>
             <outputDirectory>/</outputDirectory>
             <filtered>true</filtered>
         </file>
         <file>
-            <source>apl-db-attachments</source>
+            <source>${project.build.scriptSourceDirectory}/apl-db-attachments</source>
             <outputDirectory>/</outputDirectory>
             <filtered>true</filtered>
             <fileMode>0775</fileMode>
         </file>
         <file>
-            <source>apl-db-attachments.bat</source>
+            <source>${project.build.scriptSourceDirectory}/apl-db-attachments.bat</source>
             <outputDirectory>/</outputDirectory>
             <filtered>true</filtered>
             <fileMode>0775</fileMode>
         </file>
     </files>
+
     <dependencySets>
         <dependencySet>
             <outputDirectory>lib</outputDirectory>

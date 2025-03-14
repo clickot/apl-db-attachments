@@ -15,6 +15,6 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-cd $SCRIPT_DIR
+cd "$SCRIPT_DIR"
 exec "${JAVACMD}" ${JAVA_OPTS} --module-path "${PATH_TO_FX}" --add-modules=javafx.controls,javafx.fxml -jar "$SCRIPT_DIR"/${project.name}-${project.version}.jar "$@"
-cd $OLDDIR
+cd "$OLDPWD"
