@@ -15,13 +15,16 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration2.FileBasedConfiguration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -42,7 +45,7 @@ public class MainApp extends Application {
     public static final String PROP_WHERE_CLAUSE = "Where";
     public static final String PROP_APP_NAME = "AppName";
     public static final String PROP_APP_VERSION = "AppVersion";
-    private static final Logger logger = LogManager.getLogger(MainApp.class);
+
     private static String appName;
     private static String version;
     private static boolean gui = true;
@@ -55,13 +58,17 @@ public class MainApp extends Application {
     static {
         System.setProperty(SYSTEM_PROP_LOG4J_FILE, LOG4J_FILE);
     }
+    private static final Logger logger = LogManager.getLogger(MainApp.class);
 
     private MainOverviewController mainOverviewController;
     private Stage primaryStage;
     private RootLayoutController rootController;
     private BorderPane rootLayout;
 
-    private static void giveUsage() {
+    private static void printUsageAndExit(String message, int status) {
+        if (message != null) {
+            System.out.println(message + "\n");
+        }
         System.out.println("java -jar apl-db-attachment.jar" + System.lineSeparator());
         System.out.println("All Command line parameters are optional, remembering if a parameter has a space, it must be surrounded by \"'s");
         System.out.println("-clm: start in non gui mode as a client program");
@@ -81,6 +88,8 @@ public class MainApp extends Application {
         System.out.println("-fieldNameFolder: If you want the field name to be a folder, this will force both Form and EntryID to be folders");
         System.out.println("-where: If specified, this needs to be a syntactically correct where qualification (without the word where) and it");
         System.out.println("-\twill be applied to the query for the form(s) specified");
+
+        System.exit(status);
     }
 
     public static void main(String[] args) {
@@ -91,14 +100,14 @@ public class MainApp extends Application {
         String formArray = null;
         String fieldArray = null;
 
+        FileBasedConfigurationBuilder<FileBasedConfiguration> builder =
+                new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class)
+                        .configure(new org.apache.commons.configuration2.builder.fluent.Parameters().properties().setFileName(CONFIG_FILE));
         try {
-            config = new PropertiesConfiguration();
-            config.setDelimiterParsingDisabled(true);
-            config.load(CONFIG_FILE);
+            config = (PropertiesConfiguration) builder.getConfiguration();
         } catch (ConfigurationException e) {
             logger.error("Error opening config file: {}", e.getMessage());
-            return;
-
+            System.exit(1);
         }
 
         appName = config.getString(PROP_APP_NAME, "Application");
@@ -127,48 +136,42 @@ public class MainApp extends Application {
                         if (i < args.length) {
                             userName = args[i++];
                         } else {
-                            giveUsage();
-                            System.exit(1);
+                            printUsageAndExit(null, 1);
                         }
                         break;
                     case "-p":
                         if (i < args.length) {
                             password = args[i++];
                         } else {
-                            giveUsage();
-                            System.exit(1);
+                            printUsageAndExit(null, 1);
                         }
                         break;
                     case "-cs":
                         if (i < args.length) {
                             connectionString = args[i++];
                         } else {
-                            giveUsage();
-                            System.exit(1);
+                            printUsageAndExit(null, 1);
                         }
                         break;
                     case "-od":
                         if (i < args.length) {
                             outputDir = args[i++];
                         } else {
-                            giveUsage();
-                            System.exit(1);
+                            printUsageAndExit(null, 1);
                         }
                         break;
                     case "-formlist":
                         if (i < args.length) {
                             formArray = args[i++];
                         } else {
-                            giveUsage();
-                            System.exit(1);
+                            printUsageAndExit(null, 1);
                         }
                         break;
                     case "-fieldlist":
                         if (i < args.length) {
                             fieldArray = args[i++];
                         } else {
-                            giveUsage();
-                            System.exit(1);
+                            printUsageAndExit(null, 1);
                         }
                         break;
                     case "-formFile":
@@ -189,14 +192,11 @@ public class MainApp extends Application {
                         if (i < args.length) {
                             whereClause = args[i++];
                         } else {
-                            giveUsage();
-                            System.exit(1);
+                            printUsageAndExit(null, 1);
                         }
                         break;
                     default:
-                        System.out.println("Unknown parameter '" + arg + "'");
-                        giveUsage();
-                        System.exit(1);
+                        printUsageAndExit("Unknown parameter '" + arg + "'", 1);
                 }
             }
         }
@@ -314,6 +314,10 @@ public class MainApp extends Application {
 
     }
 
+    public static boolean isGui() {
+        return gui;
+    }
+
     public static String processExport(ObservableList<ATTRecord> selectedItems, DBConnection dbConn, boolean bulk, File selectedDirectory, boolean formFolder, boolean entryIDFolder, boolean fieldNameFolder) {
         FileChooser fileChooser = new FileChooser();
         StringBuilder output = new StringBuilder();
@@ -378,10 +382,6 @@ public class MainApp extends Application {
         return output.toString();
     }
 
-    public static boolean isGui() {
-        return gui;
-    }
-
     private static String stripNonOSValues(String s) {
         return s.replaceAll("[~#%&*{}:<>?/+|\"]", "_");
     }
@@ -435,8 +435,8 @@ public class MainApp extends Application {
         }
 
         try {
-            config.save(CONFIG_FILE);
-        } catch (ConfigurationException e) {
+            config.write(new FileWriter(CONFIG_FILE));
+        } catch (ConfigurationException | IOException e) {
             logger.error("error in saving the configuration", e);
         }
     }
