@@ -1,4 +1,4 @@
-package com.apl.view;
+package com.apl.controller;
 
 import com.apl.db.DBConnection;
 import javafx.fxml.FXML;

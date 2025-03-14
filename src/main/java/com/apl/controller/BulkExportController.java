@@ -1,4 +1,4 @@
-package com.apl.view;
+package com.apl.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.RadioButton;

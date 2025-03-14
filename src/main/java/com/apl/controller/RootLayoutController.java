@@ -1,4 +1,4 @@
-package com.apl.view;
+package com.apl.controller;
 
 import com.apl.MainApp;
 import javafx.fxml.FXML;
@@ -77,9 +77,7 @@ public class RootLayoutController {
     }
 
     @FXML
-    private void handleClose() {
-        System.exit(0);
-    }
+    private void handleClose() {}
 
     @FXML
     private void handleAbout() {

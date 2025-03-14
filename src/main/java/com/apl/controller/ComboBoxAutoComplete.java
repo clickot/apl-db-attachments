@@ -1,4 +1,4 @@
-package com.apl.view;
+package com.apl.controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

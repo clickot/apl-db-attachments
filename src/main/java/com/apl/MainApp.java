@@ -2,8 +2,8 @@ package com.apl;
 
 import com.apl.db.DBConnection;
 import com.apl.db.Exporter;
-import com.apl.view.MainOverviewController;
-import com.apl.view.RootLayoutController;
+import com.apl.controller.MainOverviewController;
+import com.apl.controller.RootLayoutController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -118,6 +118,7 @@ public class MainApp extends Application {
                 }
             }
         } finally {
+            logger.info("finally closing db connection");
             DBConnection.getInstance(connectionString, userName, password).close();
         }
     }
@@ -245,12 +246,12 @@ public class MainApp extends Application {
 
     private static PropertiesConfiguration readConfigProperties() {
         FileBasedConfigurationBuilder<FileBasedConfiguration> builder =
-                new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class).configure(
-                        new org.apache.commons.configuration2.builder.fluent.Parameters().properties()
-                                .setFileName(CONFIG_FILE)
-                                .setEncoding("UTF-8")
-                                .setBasePath(Paths.get("").toAbsolutePath().toString())
-                );
+            new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class).configure(
+                new org.apache.commons.configuration2.builder.fluent.Parameters().properties()
+                        .setFileName(CONFIG_FILE)
+                        .setEncoding("UTF-8")
+                        .setBasePath(Paths.get("").toAbsolutePath().toString())
+            );
         try {
             return (PropertiesConfiguration) builder.getConfiguration();
         } catch (ConfigurationException e) {
