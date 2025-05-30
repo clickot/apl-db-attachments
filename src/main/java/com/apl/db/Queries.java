@@ -6,7 +6,7 @@ import com.apl.model.Form;
 import java.util.List;
 import java.util.Map;
 
-public class Queries {
+public final class Queries {
 
     static String getAttachmentBytesQuery(int formID, int fieldID, String entryID) {
         return "select c" + fieldID + " from b" + formID + "c" + entryID + " where entryID = '" + entryID + "'";
@@ -18,6 +18,10 @@ public class Queries {
             query += (" and a.name in (" + String.join(",", formNameList) + ")");
         }
         return query + " order by a.name";
+    }
+
+    static String getFieldQuery(String formName) {
+        return "select distinct f.fieldID, f.fieldName from arschema a inner join field f on a.schemaid = f.schemaId inner join field_attach fa on a.schemaId = fa.schemaId and f.fieldId = fa.fieldId where a.name = '" + formName + "' and f.fOption < 4 order by f.fieldName";
     }
 
     public static String getAttachmentRecordQuery(Map<String, Form> formMap, String formName, String fieldName, String whereClause) {
@@ -44,7 +48,5 @@ public class Queries {
         return null;
     }
 
-    static String getFieldQuery(String formName) {
-        return "select distinct f.fieldID, f.fieldName from arschema a inner join field f on a.schemaid = f.schemaId inner join field_attach fa on a.schemaId = fa.schemaId and f.fieldId = fa.fieldId where a.name = '" + formName + "' and f.fOption < 4 order by f.fieldName";
-    }
+    private Queries() {}
 }

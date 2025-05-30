@@ -2,7 +2,9 @@
 
 Java tool to extract ticket attachments from a BMC Remedy Database. 
 
-This is a refactoring of the Remedy Legacy Tool [DB Attachments](https://remedylegacy.com/tools/db-attachments/) to replace outdated dependencies, especially log4j 1.x. and Oracle JDK 1.8.
+This is a refactoring of the Remedy Legacy Tool [DB Attachments](https://remedylegacy.com/tools/db-attachments/). 
+It aims to initially replace outdated dependencies, especially log4j 1.x. and Oracle JDK 1.8, and make it easier 
+to keep it up to date with dependency lib upgrades concerning security vulnerabilities.
 
 To build a release zip simply execute `mvn package`. You find the resulting zip file in the target directory.  
 To download the zip go to the [release page](https://github.com/clickot/apl-db-attachments/releases).

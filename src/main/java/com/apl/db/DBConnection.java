@@ -82,8 +82,7 @@ public class DBConnection {
                     String fileName = resultSet.getString(2);
                     int fileSize = resultSet.getInt(3);
                     if (fileName != null && !fileName.isEmpty() && fileSize > 0) {
-                        ATTRecord attRecord = new ATTRecord(entryID, fileName, fileSize, formID, fieldID, formName, fieldName);
-                        recordList.add(attRecord);
+                        recordList.add(new ATTRecord(entryID, fileName, fileSize, formID, fieldID, formName, fieldName));
                     }
                 }
             }
@@ -104,8 +103,7 @@ public class DBConnection {
                     String fileName = resultSet.getString(2);
                     int fileSize = resultSet.getInt(3);
                     if (fileName != null && !fileName.isEmpty() && fileSize > 0) {
-                        ATTRecord attRecord = new ATTRecord(entryID, fileName, fileSize, formID, fieldID, formName, fieldName);
-                        recordList.add(attRecord);
+                        recordList.add(new ATTRecord(entryID, fileName, fileSize, formID, fieldID, formName, fieldName));
                     }
                 }
             }
@@ -118,11 +116,12 @@ public class DBConnection {
         String query = getFormDataQuery(formNameList);
         logger.debug("Issuing form query: {}", query);
 
+        Map<String, Form> formMap = new LinkedHashMap<>();
+        int formCount;
+
         try (Statement statement = getConnection().createStatement()) {
             try (ResultSet resultSet = statement.executeQuery(query)) {
-                Map<String, Form> formMap = new LinkedHashMap<>();
-                int formCount = 0;
-                for (; resultSet.next(); formCount++) {
+                for (formCount = 0; resultSet.next(); formCount++) {
                     String formName = resultSet.getString(1);
                     int formID = resultSet.getInt(2);
                     int resolvedFormID = resultSet.getInt(3);
@@ -130,13 +129,9 @@ public class DBConnection {
                     try (Statement st = getConnection().createStatement()) {
                         String q = Queries.getFieldQuery(formName);
                         logger.debug("Issuing field query: {}", q);
-
                         try (ResultSet fieldResults = st.executeQuery(q)) {
-                            if (fieldResults == null) {
-                                return null;
-                            }
-                            int fieldCount = 0;
-                            for (; fieldResults.next(); fieldCount++) {
+                            int fieldCount;
+                            for (fieldCount = 0; fieldResults.next(); fieldCount++) {
                                 int fieldID = fieldResults.getInt(1);
                                 String fieldName = fieldResults.getString(2);
                                 form.addField(fieldName, fieldID);
@@ -146,10 +141,11 @@ public class DBConnection {
                     }
                     formMap.put(formName, form);
                 }
-                logger.debug("Form Query returned {} records", formCount);
-                return formMap;
             }
         }
+
+        logger.debug("Form Query returned {} records", formCount);
+        return formMap;
     }
 
     public void close() {
